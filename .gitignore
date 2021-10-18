@@ -1,0 +1,5 @@
+/authenv
+/__pycache__
+/src/images/*
+.env
+flaskapp.log

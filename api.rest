@@ -1,0 +1,34 @@
+@baseUrl = http://localhost:1122/api/v1
+@contentType = application/json
+
+###
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email":"nanaakuffu@gmail.com",
+    "password":"password"
+}
+
+###
+@token=Bearer {{login.response.body.data.token}}
+
+###
+GET {{baseUrl}}/users
+Authorization: {{token}}
+
+###
+POST {{baseUrl}}/users
+Authorization: {{token}}
+Content-Type: application/json
+
+{
+    "first_name":"Nana Abeiku",
+    "last_name":"Andam",
+    "email":"nanabaahakuffu@gmail.com",
+    "password":"password"
+}
+
+###
+GET {{baseUrl}}/avatar/1

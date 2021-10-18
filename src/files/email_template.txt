@@ -1,0 +1,6 @@
+"<p>Welcome! </p>
+<p>Thanks for signing up. Please follow this link to activate your
+account:</p> 
+<p><a href='{{ verification_email }}'>{{verification_email }}</a></p> 
+<br> 
+<p>Thanks!</p>"
