@@ -1,6 +1,6 @@
 from flask import request, current_app
 from flask_restful import Resource
-from flask_jwt_extended import create_access_token, jwt_required, get_current_user
+from flask_jwt_extended import create_access_token, jwt_required
 
 from ..models.users import User, UserSchema
 from ...utils.responses import Responses as R
@@ -57,6 +57,9 @@ class UsersApi(Resource):
 
 
 class LoginApi(Resource):
+    def __str__(self) -> str:
+        return 'login'
+
     def post(self):
         try:
             data = request.get_json()

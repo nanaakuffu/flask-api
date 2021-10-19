@@ -31,8 +31,8 @@ class Author(db.Model):
         return self
 
 
-class AuthorSchema(Schema):
-    class Meta(Schema.Meta):
+class AuthorSchema(SQLAlchemyAutoSchema):
+    class Meta(SQLAlchemyAutoSchema.Meta):
         # fields = ('id', 'first_name', 'last_name', 'books')
         model = Author
         sqla_session = db.session

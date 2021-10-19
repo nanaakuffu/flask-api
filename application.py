@@ -4,7 +4,7 @@ from threading import Thread
 
 from src import Application
 from src.api.utils.email import EmailBroker
-from src.api.config.config import ProductionConfig, TestingConfig, DevelopmentConfig
+from config.config import ProductionConfig, TestingConfig, DevelopmentConfig
 from src.api.utils.queues import Queues
 
 

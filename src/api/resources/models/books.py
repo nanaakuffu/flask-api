@@ -24,8 +24,8 @@ class Book(db.Model):
         return self
 
 
-class BookSchema(Schema):
-    class Meta(Schema.Meta):
+class BookSchema(SQLAlchemyAutoSchema):
+    class Meta(SQLAlchemyAutoSchema.Meta):
         model = Book
         sqla_session = db.session
 

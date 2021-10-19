@@ -1,7 +1,7 @@
 from jinja2.loaders import FileSystemLoader
 from passlib.hash import pbkdf2_sha256 as sha256
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-from marshmallow import fields, Schema
+from marshmallow import fields
 
 from src.api.utils.database import db
 
@@ -36,8 +36,8 @@ class User(db.Model):
         return sha256.verify(password, hash)
 
 
-class UserSchema(Schema):
-    class Meta(Schema.Meta):
+class UserSchema(SQLAlchemyAutoSchema):
+    class Meta(SQLAlchemyAutoSchema.Meta):
         model = User
         sqla_session = db.session
 

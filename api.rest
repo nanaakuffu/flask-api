@@ -4,7 +4,7 @@
 ###
 # @name login
 POST {{baseUrl}}/auth/login
-Content-Type: application/json
+Content-Type: {{contentType}}
 
 {
     "email":"nanaakuffu@gmail.com",
@@ -21,7 +21,7 @@ Authorization: {{token}}
 ###
 POST {{baseUrl}}/users
 Authorization: {{token}}
-Content-Type: application/json
+Content-Type: {{contentType}}
 
 {
     "first_name":"Nana Abeiku",
@@ -30,5 +30,18 @@ Content-Type: application/json
     "password":"password"
 }
 
+###
+{{baseUrl}}/authors/1
+Authorization: {{token}}
+
+###
+POST {{baseUrl}}/books
+Authorization: {{token}}
+Content-Type: {{contentType}}
+
+{
+    "title": "The man called Nana",
+    "year":2021
+}
 ###
 GET {{baseUrl}}/avatar/1

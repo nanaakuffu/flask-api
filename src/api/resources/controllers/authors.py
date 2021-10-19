@@ -1,6 +1,6 @@
 import os
 from flask import request, current_app, send_from_directory
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, current_user
 from flask_restful import Resource
 from werkzeug.utils import secure_filename
 
@@ -43,6 +43,7 @@ class AuthorApi(Resource):
     def get(self, author_id):
         authorData = Author.query.get_or_404(author_id)
         try:
+            print(current_user['id'])
             author = AuthorSchema(
                 only=['id', 'first_name', 'last_name', 'books', 'avatar']).dump(authorData)
             return R.response_with(R.SUCCESS_200, value=author)

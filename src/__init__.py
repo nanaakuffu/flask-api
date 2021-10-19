@@ -14,7 +14,7 @@ from .api.utils.database import db
 from .api.utils.responses import Responses as R
 
 
-from .api.resources.routes import Routes
+from .api.routes.web import routes
 
 
 class Application():
@@ -23,6 +23,7 @@ class Application():
 
     At its instantiation, it only accepts the configuration imported form the config class.
     """
+    prefix = "/api/v1"
 
     def __init__(self, config) -> None:
         self.config = config
@@ -51,24 +52,38 @@ class Application():
         @self.jwt.user_lookup_loader
         def getUser(jwt_header: Dict, jwt_data: Dict):
             currentUser = User.findByEmail(jwt_data['sub'])
-            userData = UserSchema().dump(currentUser)
-            del userData['password']
+            userData = UserSchema(
+                only=['id', 'first_name', 'last_name', 'email', 'is_verified', 'created_at']).dump(currentUser)
 
             return userData
 
     def middlewares(self):
         CORS(self.app)
 
-        Routes(self.api).routes()
+        self.routes()
 
         self.getCurrentUser()
 
         self.errorHandlers()
 
+    def routes(self):
+        for route in routes:
+            route['url'] = self.prefix+'/'+route['url']
+            self.api.add_resource(
+                route['resource'],
+                route['url'],
+                endpoint=route['endpoint'] if 'endpoint' in route else route['resource'].__name__.lower(
+                )
+            )
+
     def errorHandlers(self):
         @self.app.after_request
         def add_header(response):
             return response
+
+        @self.jwt.expired_token_loader
+        def token_expired(jwt_header, jwt_data):
+            return R.response_with(R.VERIFIVATION_TOKEN_EXPIRED_400)
 
         @self.app.errorhandler(400)
         def bad_request(e):

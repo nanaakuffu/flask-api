@@ -1,5 +1,4 @@
-from flask_jwt_extended.utils import get_current_user
-from flask_jwt_extended.view_decorators import jwt_required
+from flask_jwt_extended import jwt_required, current_user
 from flask_restful import Resource
 from flask import request
 
@@ -26,8 +25,8 @@ class BooksApi(Resource):
             data = request.get_json()
             book_schema = BookSchema()
             book_data = book_schema.load(data)
-            author = get_current_user()
-            book_data['author_id'] = author['id']
+
+            book_data['author_id'] = current_user['id']
             book = Book(**book_data)
 
             result = book_schema.dump(book.create())
