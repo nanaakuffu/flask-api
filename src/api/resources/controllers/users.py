@@ -63,35 +63,36 @@ class LoginApi(Resource):
     def post(self):
         try:
             data = request.get_json()
-            currentUser = User.findByEmail(data['email'])
-            if not currentUser:
-                return R.response_with(R.SERVER_ERROR_404)
+            user = User.findByEmail(data['email'])
+            if not user:
+                return R.response_with(R.CLIENT_ERROR_404)
 
-            if currentUser and not currentUser.is_verified:
+            if user and not user.is_verified:
 
                 # Send request to the queue to run in the background
-                # Queues().sendDispatch(currentUser.email)
+                # Queues().sendDispatch(user.email)
 
                 email = EmailBroker(current_app.config['SECRET_KEY'],
                                     current_app.config['SECURITY_PASSWORD_SALT'])
 
-                email.threadQueue(currentUser.email)
+                email.threadQueue(user.email)
 
                 return R.response_with(R.EMAIL_NOT_VERIFIED_400)
 
-            if User.verifyHash(data['password'], currentUser.
+            if User.verifyHash(data['password'], user.
                                password):
 
                 access_token = create_access_token(identity=data['email'])
-                userData = UserSchema().dump(currentUser)
-                del userData['password']
+                userData = UserSchema(
+                    only=['id', 'first_name', 'last_name', 'email', 'is_verified', 'created_at']).dump(user)
+
                 userData['token'] = access_token
                 return R.response_with(R.SUCCESS_200, value=userData)
             else:
                 return R.response_with(R.UNAUTHORIZED_401)
         except Exception as e:
             print(e)
-            return R.response_with(R.INVALID_INPUT_422)
+            return R.response_with(R.INVALID_INPUT_422, error=e)
 
 
 class EmailVerificationApi(Resource):
@@ -116,4 +117,4 @@ class EmailVerificationApi(Resource):
                 return R.response_with(R.EMAIL_VERIFIED_200)
         except Exception as e:
             print(e)
-            return R.response_with(R.SERVER_ERROR_404)
+            return R.response_with(R.CLIENT_ERROR_404, error=e)

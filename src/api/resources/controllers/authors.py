@@ -1,7 +1,7 @@
 import os
 from flask import request, current_app, send_from_directory
 from flask_jwt_extended import jwt_required, current_user
-from flask_restful import Resource
+from flask_restful import Resource, abort
 from werkzeug.utils import secure_filename
 
 from ..models.authors import Author, AuthorSchema
@@ -27,6 +27,11 @@ class AuthorsApi(Resource):
         try:
             data = request.get_json()
             author_schema = AuthorSchema()
+            errors = author_schema.validate(data)
+
+            if errors:
+                abort(422)
+
             author_data = author_schema.load(data)
             author = Author(**author_data)
 
@@ -35,7 +40,7 @@ class AuthorsApi(Resource):
             return R.response_with(R.SUCCESS_201, value=result)
         except Exception as e:
             print(e)
-            return R.response_with(R.INVALID_INPUT_422)
+            return R.response_with(R.INVALID_INPUT_422, error=e)
 
 
 class AuthorApi(Resource):
@@ -43,13 +48,13 @@ class AuthorApi(Resource):
     def get(self, author_id):
         authorData = Author.query.get_or_404(author_id)
         try:
-            print(current_user['id'])
+            # print(current_user['id'])
             author = AuthorSchema(
                 only=['id', 'first_name', 'last_name', 'books', 'avatar']).dump(authorData)
             return R.response_with(R.SUCCESS_200, value=author)
         except Exception as e:
             print(e)
-            return R.response_with(R.SERVER_ERROR_500)
+            return R.response_with(R.SERVER_ERROR_500, error=e)
 
     @jwt_required()
     def put(self, author_id):
@@ -67,7 +72,7 @@ class AuthorApi(Resource):
             return R.response_with(R.SUCCESS_200, value=authorSchemaData)
         except Exception as e:
             print(e)
-            return R.response_with(R.INVALID_INPUT_422)
+            return R.response_with(R.INVALID_INPUT_422, error=e)
 
     @jwt_required()
     def delete(self, author_id):
@@ -80,7 +85,7 @@ class AuthorApi(Resource):
             return R.response_with(R.SUCCESS_204)
         except Exception as e:
             print(e)
-            return R.response_with(R.SERVER_ERROR_500)
+            return R.response_with(R.SERVER_ERROR_500, error=e)
 
 
 class AuthorAvatarApi(Resource):
@@ -122,4 +127,4 @@ class AuthorAvatarApi(Resource):
             return R.response_with(R.SUCCESS_200, value=author_data)
         except Exception as e:
             print(e)
-            return R.response_with(R.INVALID_INPUT_422)
+            return R.response_with(R.INVALID_INPUT_422, error=e)

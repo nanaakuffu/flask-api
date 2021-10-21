@@ -17,7 +17,7 @@ class BooksApi(Resource):
             return R.response_with(R.SUCCESS_200, value=books)
         except Exception as e:
             print(e)
-            return R.response_with(R.SERVER_ERROR_500)
+            return R.response_with(R.SERVER_ERROR_500, error=e)
 
     @jwt_required()
     def post(self):
@@ -34,7 +34,7 @@ class BooksApi(Resource):
             return R.response_with(R.SUCCESS_201, value=result)
         except Exception as e:
             print(e)
-            return R.response_with(R.INVALID_INPUT_422)
+            return R.response_with(R.INVALID_INPUT_422, error=e)
 
 
 class BookApi(Resource):
@@ -45,7 +45,7 @@ class BookApi(Resource):
             return R.response_with(R.SUCCESS_200, value=result)
         except Exception as e:
             print(e)
-            return R.response_with(R.SERVER_ERROR_500)
+            return R.response_with(R.SERVER_ERROR_500, error=e)
 
     @jwt_required()
     def put(self, book_id):
@@ -64,7 +64,7 @@ class BookApi(Resource):
 
         except Exception as e:
             print(e)
-            return R.response_with(R.INVALID_INPUT_422)
+            return R.response_with(R.INVALID_INPUT_422, error=e)
 
     @jwt_required()
     def delete(self, book_id):
@@ -76,4 +76,4 @@ class BookApi(Resource):
             return R.response_with(R.SUCCESS_204)
         except Exception as e:
             print(e)
-            return R.response_with(R.SERVER_ERROR_500)
+            return R.response_with(R.SERVER_ERROR_500, error=e)

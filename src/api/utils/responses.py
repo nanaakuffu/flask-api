@@ -40,6 +40,12 @@ class Responses():
         "message": "Email verification token has expired."
     }
 
+    JWT_TOKEN_EXPIRED_401 = {
+        "http_code": 401,
+        "code": "authTokenExpired",
+        "message": "Authentication token has expired."
+    }
+
     EMAIL_NOT_VERIFIED_500 = {
         "http_code": 500,
         "code": "serverEmailBadRequest",
@@ -58,7 +64,7 @@ class Responses():
         "message": "Internal Server Error"
     }
 
-    SERVER_ERROR_404 = {
+    CLIENT_ERROR_404 = {
         "http_code": 404,
         "code": "notFound",
         "message": "Resource not found"
@@ -97,7 +103,6 @@ class Responses():
     def response_with(
         response: Dict,
         value: Any = None,
-        message: str = None,
         error: Any = None,
         headers: Dict = {},
         pagination: Any = None
@@ -113,7 +118,8 @@ class Responses():
             result.update({'status_code': response['http_code']})
 
         if error is not None:
-            result.update({'errors': error})
+            result['status_code'] = error.code
+            result['message'] = error.description
 
         if pagination is not None:
             result.update({'pagination': pagination})
