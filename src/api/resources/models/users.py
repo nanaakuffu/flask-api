@@ -17,6 +17,7 @@ class User(db.Model):
     password = db.Column(db.String(120), nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     is_verified = db.Column(db.Boolean, nullable=False, default=False)
+    avatar = db.Column(db.String(100), nullable=True)
 
     def create(self):
         db.session.add(self)
@@ -48,3 +49,4 @@ class UserSchema(SQLAlchemyAutoSchema):
     password = fields.String(required=True)
     created_at = fields.String(dump_only=True)
     is_verified = fields.Integer(dump_only=True)
+    avatar = fields.String(dump_only=True)

@@ -17,7 +17,7 @@ class Author(db.Model):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     books = db.relationship('Book', backref='Author',
                             cascade="all, delete-orphan")
-    avatar = db.Column(db.String(20), nullable=True)
+    avatar = db.Column(db.String(50), nullable=True)
 
     def __init__(self, first_name: str = None, last_name: str = None, books=[]) -> None:
         super().__init__()
