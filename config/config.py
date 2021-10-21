@@ -15,7 +15,7 @@ class Config(object):
     SECURITY_PASSWORD_SALT = os.environ.get(
         'SECURITY_PASSWORD_SALT', default='')
 
-    MAIL_DEFAULT_SENDER = 'survey@mybqualityscansafecaregh.com'
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
     MAIL_SERVER = os.environ.get('MAIL_SERVER')
     MAIL_PORT = os.environ.get('MAIL_PORT')
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
