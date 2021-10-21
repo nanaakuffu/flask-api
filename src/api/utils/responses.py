@@ -13,7 +13,25 @@ class Responses():
     INVALID_INPUT_422 = {
         "http_code": 422,
         "code": "invalidInput",
-        "message": "Invalid input"
+        "message": "Invalid input provided."
+    }
+
+    INVALID_LOGIN_CREDENTIALS = {
+        "http_code": 401,
+        "code": "invalidLoginCredentials",
+        "message": "Incorrect email or password."
+    }
+
+    INVALID_TOKEN_401 = {
+        'http_code': 401,
+        'code': 'invalidToken',
+        "message": "Authentication token is invalid."
+    }
+
+    TOKENLESS_HEADER_401 = {
+        'http_code': 401,
+        'code': 'noTokenInHeader',
+        'message': 'No token in header'
     }
 
     MISSING_PARAMETERS_422 = {
@@ -67,13 +85,13 @@ class Responses():
     CLIENT_ERROR_404 = {
         "http_code": 404,
         "code": "notFound",
-        "message": "Resource not found"
+        "message": "Resource not found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."
     }
 
     UNAUTHORIZED_403 = {
         "http_code": 403,
         "code": "notAuthorized",
-        "message": "You are not authorised to execute this."
+        "message": "You don't have the permission to access the requested resource. It is either read-protected or not readable by the server."
     }
 
     SUCCESS_200 = {
@@ -118,8 +136,7 @@ class Responses():
             result.update({'status_code': response['http_code']})
 
         if error is not None:
-            result['status_code'] = error.code
-            result['message'] = error.description
+            result.update({"errors": error})
 
         if pagination is not None:
             result.update({'pagination': pagination})
