@@ -1,9 +1,10 @@
+from typing import List
 from flask_sqlalchemy import model
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
+from marshmallow_sqlalchemy import SQLAlchemySchema
 from marshmallow import fields, Schema
 
 from .books import BookSchema
-from ...utils.database import db
+from ...utils.database import db, ma
 
 
 class Author(db.Model):
@@ -19,7 +20,7 @@ class Author(db.Model):
                             cascade="all, delete-orphan")
     avatar = db.Column(db.String(50), nullable=True)
 
-    def __init__(self, first_name: str = None, last_name: str = None, books=[]) -> None:
+    def __init__(self, first_name: str = None, last_name: str = None, books: List = []) -> None:
         super().__init__()
         self.first_name = first_name
         self.last_name = last_name
@@ -31,9 +32,9 @@ class Author(db.Model):
         return self
 
 
-class AuthorSchema(SQLAlchemyAutoSchema):
-    class Meta(SQLAlchemyAutoSchema.Meta):
-        # fields = ('id', 'first_name', 'last_name', 'books')
+class AuthorSchema(ma.SQLAlchemySchema):
+    class Meta(SQLAlchemySchema.Meta):
+        fields = ('id', 'first_name', 'last_name', 'books')
         model = Author
         sqla_session = db.session
 

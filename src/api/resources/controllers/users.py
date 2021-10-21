@@ -3,14 +3,14 @@ from flask_restful import Resource
 from flask_jwt_extended import create_access_token, jwt_required
 
 from ..models.users import User, UserSchema
-from ...utils.responses import Responses as R
+from ...utils.responses import Responses
 from ...utils.email import EmailBroker
 from ...utils.database import db
 from ...utils.token import EmailVerificationToken
 from ...utils.queues import Queues
 
 
-class UsersApi(Resource):
+class UsersApi(Resource, Responses):
     @jwt_required()
     def get(self):
         try:
@@ -19,10 +19,10 @@ class UsersApi(Resource):
                 many=True, only=['id', 'first_name', 'last_name', 'email', 'is_verified', 'created_at'])
             users = userSchema.dump(data)
 
-            return R.response_with(R.SUCCESS_200, value=users)
+            return self.response_with(self.SUCCESS_200, value=users)
         except Exception as e:
             print(e)
-            return R.response_with(R.SERVER_ERROR_500, error=e)
+            return self.response_with(self.SERVER_ERROR_500)
 
     @jwt_required()
     def post(self):
@@ -30,7 +30,7 @@ class UsersApi(Resource):
             data = request.get_json()
 
             if User.findByEmail(data['email']) is not None:
-                return R.response_with(R.INVALID_INPUT_422)
+                return self.response_with(self.INVALID_INPUT_422)
 
             data['password'] = User.generateHash(data['password'])
             user_schema = UserSchema()
@@ -49,14 +49,14 @@ class UsersApi(Resource):
             result = user_schema.dump(user.create())
             del result['password']
 
-            return R.response_with(R.SUCCESS_201, value=result)
+            return self.response_with(self.SUCCESS_201, value=result)
 
         except Exception as e:
             print(e)
-            return R.response_with(R.INVALID_INPUT_422, error=e)
+            return self.response_with(self.INVALID_INPUT_422)
 
 
-class LoginApi(Resource):
+class LoginApi(Resource, Responses):
     def __str__(self) -> str:
         return 'login'
 
@@ -65,7 +65,7 @@ class LoginApi(Resource):
             data = request.get_json()
             user = User.findByEmail(data['email'])
             if not user:
-                return R.response_with(R.CLIENT_ERROR_404)
+                return self.response_with(self.CLIENT_ERROR_404)
 
             if user and not user.is_verified:
 
@@ -77,25 +77,26 @@ class LoginApi(Resource):
 
                 email.threadQueue(user.email)
 
-                return R.response_with(R.EMAIL_NOT_VERIFIED_400)
+                return self.response_with(self.EMAIL_NOT_VERIFIED_400)
 
-            if User.verifyHash(data['password'], user.
-                               password):
+            if User.verifyHash(data['password'],
+                               user.password
+                               ):
 
                 access_token = create_access_token(identity=data['email'])
                 userData = UserSchema(
                     only=['id', 'first_name', 'last_name', 'email', 'is_verified', 'created_at']).dump(user)
 
                 userData['token'] = access_token
-                return R.response_with(R.SUCCESS_200, value=userData)
+                return self.response_with(self.SUCCESS_200, value=userData)
             else:
-                return R.response_with(R.UNAUTHORIZED_401)
+                return self.response_with(self.INVALID_LOGIN_CREDENTIALS)
         except Exception as e:
             print(e)
-            return R.response_with(R.INVALID_INPUT_422, error=e)
+            return self.response_with(self.INVALID_INPUT_422)
 
 
-class EmailVerificationApi(Resource):
+class EmailVerificationApi(Resource, Responses):
     def get(self, token):
         try:
             verify_email = EmailVerificationToken(current_app.config['SECRET_KEY'],
@@ -103,18 +104,18 @@ class EmailVerificationApi(Resource):
             email = verify_email.confirmVerificationToken(token)
 
             if not email:
-                R.response_with(R.VERIFIVATION_TOKEN_EXPIRED_400)
+                self.response_with(self.VERIFIVATION_TOKEN_EXPIRED_400)
 
             # print(email)
             user = User.query.filter_by(email=email).first_or_404()
-            if user.is_verified:
-                return R.response_with(R.INVALID_INPUT_422)
-            else:
+
+            if not user.is_verified:
                 user.is_verified = True
                 db.session.add(user)
                 db.session.commit()
 
-                return R.response_with(R.EMAIL_VERIFIED_200)
+                return self.response_with(self.EMAIL_VERIFIED_200)
+
         except Exception as e:
             print(e)
-            return R.response_with(R.CLIENT_ERROR_404, error=e)
+            return self.response_with(self.CLIENT_ERROR_404)

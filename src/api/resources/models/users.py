@@ -1,9 +1,7 @@
-from jinja2.loaders import FileSystemLoader
 from passlib.hash import pbkdf2_sha256 as sha256
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from marshmallow import fields
 
-from src.api.utils.database import db
+from src.api.utils.database import db, ma
 
 
 class User(db.Model):
@@ -18,6 +16,7 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     is_verified = db.Column(db.Boolean, nullable=False, default=False)
     avatar = db.Column(db.String(100), nullable=True)
+    verification_sent = db.Column(db.Boolean, nullable=False, default=False)
 
     def create(self):
         db.session.add(self)
@@ -37,8 +36,8 @@ class User(db.Model):
         return sha256.verify(password, hash)
 
 
-class UserSchema(SQLAlchemyAutoSchema):
-    class Meta(SQLAlchemyAutoSchema.Meta):
+class UserSchema(ma.SQLAlchemySchema):
+    class Meta(ma.SQLAlchemySchema.Meta):
         model = User
         sqla_session = db.session
 
