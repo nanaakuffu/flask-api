@@ -11,8 +11,8 @@ from flask_migrate import Migrate
 
 from src.api.resources.models.users import User, UserSchema
 
-from .api.utils.database import db
-from .api.utils.responses import Responses as R
+from .api.utils.database import db, ma
+from .api.utils.error_handler import ErrorHandler
 
 
 from .api.routes.web import routes
@@ -36,19 +36,18 @@ class Application():
         self.api = Api(self.app)
         self.migrate = Migrate(self.app, db)
 
+        db.init_app(self.app)
+        ma.init_app(self.app)
+
         self.middlewares()
 
-        db.init_app(self.app)
-        with self.app.app_context():
-            db.create_all()
-
-        # logging.basicConfig(stream=sys.stdout,
-        #                     format='%(asctime)s %(levelname)s: %(message)s [in %(filename)s: %(lineno)s]',
-        #                     level=logging.DEBUG)
+        logging.basicConfig(stream=sys.stdout,
+                            format='%(asctime)s %(levelname)s: %(message)s [in %(filename)s: %(lineno)s]',
+                            level=logging.DEBUG)
 
         logging.getLogger("pika").setLevel(logging.WARNING)
 
-        self.configure_logging()
+        self.configure_logging(self.app)
 
     def getCurrentUser(self):
         @self.jwt.user_lookup_loader
@@ -66,7 +65,8 @@ class Application():
 
         self.getCurrentUser()
 
-        self.errorHandlers()
+        errorHandler = ErrorHandler(self.app, self.jwt)
+        errorHandler.errorHandlers()
 
     def routes(self):
         for route in routes:
@@ -78,38 +78,9 @@ class Application():
                 )
             )
 
-    def errorHandlers(self):
-        @self.app.after_request
-        def add_header(response):
-            return response
-
-        @self.jwt.expired_token_loader
-        def token_expired(jwt_header, jwt_data):
-            return R.response_with(R.JWT_TOKEN_EXPIRED_401)
-
-        @self.app.errorhandler(400)
-        def bad_request(e):
-            logging.error(e)
-            return R.response_with(R.BAD_REQUEST_400, error=e)
-
-        @self.app.errorhandler(500)
-        def server_error(e):
-            logging.error(e)
-            return R.response_with(R.SERVER_ERROR_500, error=e)
-
-        @self.app.errorhandler(404)
-        def not_found(e):
-            logging.error(e)
-            return R.response_with(R.CLIENT_ERROR_404, error=e)
-
-        @self.app.errorhandler(405)
-        def method_not_allowed(e):
-            logging.error(e)
-            return R.response_with(R.METHOD_NOT_ALLOWED_405, error=e)
-
-    def configure_logging(self):
+    def configure_logging(self, app):
         # Deactivate the default flask logger so that log messages don't get duplicated
-        self.app.logger.removeHandler(default_handler)
+        app.logger.removeHandler(default_handler)
 
         # Create a file handler object
         file_handler = RotatingFileHandler(
@@ -126,4 +97,4 @@ class Application():
         file_handler.setFormatter(file_formatter)
 
         # Add file handler object to the logger
-        self.app.logger.addHandler(file_handler)
+        app.logger.addHandler(file_handler)
