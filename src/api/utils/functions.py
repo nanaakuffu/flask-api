@@ -5,7 +5,7 @@ from string import ascii_letters, digits
 
 class Helpers():
 
-    def randomize(length: int = 16) -> str:
+    def __randomize(length: int = 16) -> str:
         randomString = ''
 
         source_string = ascii_letters+digits
@@ -16,8 +16,8 @@ class Helpers():
 
         return randomString
 
-    @staticmethod
-    def hashString(self, upload_dir: str, folder_name: str, fileName: str = "") -> str:
+    @classmethod
+    def hashString(cls, upload_dir: str, folder_name: str, fileName: str = "") -> str:
 
         if folder_name:
             path = folder_name.rstrip('/')+'/'
@@ -27,6 +27,6 @@ class Helpers():
         if not os.path.exists(upload_dir):
             os.mkdir(upload_dir)
 
-        fileString, fileExtension = os.path.splitext(fileName)
+        fileExtension = os.path.splitext(fileName)[1]
 
-        return path+self.randomize(40)+fileExtension
+        return path+cls.__randomize(40)+fileExtension
