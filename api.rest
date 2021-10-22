@@ -35,6 +35,19 @@ Content-Type: {{contentType}}
 Authorization: {{token}}
 
 ###
+POST {{baseUrl}}/authors
+Authorization: {{token}}
+Content-Type: {{contentType}}
+
+{
+    "first_name":"Abeiku",
+    "last_name":"Baah Akuffu"
+}
+
+###
+{{baseUrl}}/books
+
+###
 POST {{baseUrl}}/books
 Authorization: {{token}}
 Content-Type: {{contentType}}
